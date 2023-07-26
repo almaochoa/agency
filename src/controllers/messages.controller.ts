@@ -47,8 +47,6 @@ function validateRegExp(line: string){
  
 function messageFound(msgSearch: string, msgEncrypted: string): boolean {
 
-    console.log(msgEncrypted);
-    console.log(msgSearch);
     let msgExpReg:string = "";
     for(let i=0; i < msgSearch.length; i++){
         msgExpReg += `(${msgSearch[i]}{1,3})`; 
@@ -66,6 +64,7 @@ const getMessage: RequestHandler = async (req, res) => {
     let lines:string[] = [];
     let msgOneFound = false;
     let msgTwoFound = false;
+    let response: string = "";
 
     try {
         exist = await fileExist(file);
@@ -77,33 +76,35 @@ const getMessage: RequestHandler = async (req, res) => {
                     await validateFirstLine(lines[0])
                     .then((result:any) => {
                         if(validateRegExp(lines[1]) && validateRegExp(lines[2]) && validateRegExp(lines[3])){
-                        msgOneFound = messageFound(lines[1], lines[3]);
-                        if(!msgOneFound)
-                            msgTwoFound = messageFound(lines[2], lines[3]);
-
-                            console.log('msg1 ', msgOneFound);
-                            console.log('msg2 ', msgTwoFound);
-                            res.status(201).json({success:true});
-                        } else {
-                            console.log('Format incorrect');
-                            res.status(404).json({success:false});
-                        }                                 
+                            msgOneFound = messageFound(lines[1], lines[3]);
+                            if(msgOneFound){
+                                response = `SI<br/>NO`;    
+                            } else {
+                                msgTwoFound = messageFound(lines[2], lines[3]);    
+                                if(msgTwoFound){
+                                    response = `NO<br/>SI`;    
+                                } else { //not found any message
+                                    response = `NO<br/>NO`;    
+                                }
+                            }
+                            res.status(201).send(response);    
+                        }                               
                     })  
                     .catch((error:any) => console.log(error));                    
                 } else {
                     console.log('Lines Missing');
-                    res.status(404).json({success:false});
+                    //res.status(404).json({success:false});
                 }    
             } else {
                 console.log('File empty');
-                res.status(404).json({success:false});
+                //res.status(404).json({success:false});
             }                            
         } else {
             console.log('File not exist');
-            res.status(404).json({success:false});
+            //res.status(404).json({success:false});
         }
     } catch(err) {
-        res.status(404).json({success:false});
+        //res.status(404).json({success:false});
     }    
 
 }

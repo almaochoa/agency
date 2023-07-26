@@ -96,6 +96,7 @@ const getMessage: RequestHandler = async (req, res) => {
     let msgOneFound = false;
     let msgTwoFound = false;
     let response: string = "";
+    let error: string = "";
 
     try {
         exist = await fileExist(file);
@@ -122,21 +123,27 @@ const getMessage: RequestHandler = async (req, res) => {
                             res.status(201).send(response);    
                         }                               
                     })  
-                    .catch((error:any) => console.log(error));                    
+                    .catch((error:any) => {
+                        console.log(error);
+                        res.status(404).json({success:false, error: error});
+                    });                    
                 } else {
-                    console.log('Lines Missing');
-                    //res.status(404).json({success:false});
+                    error = 'Lines Missing';
+                    console.log(error);
+                    res.status(404).json({success:false, error: error});
                 }    
             } else {
-                console.log('File empty');
-                //res.status(404).json({success:false});
+                error = 'Empty File';
+                console.log(error);
+                res.status(404).json({success:false, error: error});
             }                            
         } else {
-            console.log('File not exist');
-            //res.status(404).json({success:false});
+            error = 'File not exist';
+            console.log(error);
+            res.status(404).json({success:false, error: error});
         }
     } catch(err) {
-        //res.status(404).json({success:false});
+        res.status(404).json({success:false, error: err});
     }    
 
 }

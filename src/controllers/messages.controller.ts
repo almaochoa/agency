@@ -1,6 +1,11 @@
 import { RequestHandler } from "express";
 const fs = require('fs');
 
+/**
+ * 
+ * @param file: string 
+ * @returns true if file exist in DIR encmsgs false otherwise
+ */
 async function fileExist(file:string) {
     try {
         if (fs.existsSync(file)) {
@@ -11,6 +16,11 @@ async function fileExist(file:string) {
       }
 } 
 
+/**
+ * 
+ * @param line:string
+ * @returns true if all elements are numbers and kept the bounderies
+ */
 async function validateFirstLine(line: string){
     let elements = line.split(" ");
     let allValids:boolean = true;
@@ -38,13 +48,29 @@ async function validateFirstLine(line: string){
 
 }
 
-function validateRegExp(line: string){
+/*
+    Validate message and instructions like alfanumeric string
+*/
+/**
+ * 
+ * @param line 
+ * @returns true if message and instructions are alfanumeric string
+ */
+function validateAlfaNum(line: string): boolean{
  
     const regex = /^([a-zA-Z0-9]+)$/g;
     return regex.test(line);
 
 }
- 
+
+/**
+ * This function create a pattern base on msgSearch
+ * separating every char and form the expreg to accepte 
+ * the char 1, 2 o 3 times 
+ * @param msgSearch 
+ * @param msgEncrypted 
+ * @returns true if msgSearch is found into msgEncrypted
+ */
 function messageFound(msgSearch: string, msgEncrypted: string): boolean {
 
     let msgExpReg:string = "";
@@ -55,6 +81,11 @@ function messageFound(msgSearch: string, msgEncrypted: string): boolean {
     return regex.test(msgEncrypted);
 }
 
+/**
+ * Endpoint function process the file with the id received
+ * @param req 
+ * @param res 
+ */
 const getMessage: RequestHandler = async (req, res) => {    
 
     let file_id = req.params.id;
@@ -75,7 +106,8 @@ const getMessage: RequestHandler = async (req, res) => {
                 if(lines.length == 4) {
                     await validateFirstLine(lines[0])
                     .then((result:any) => {
-                        if(validateRegExp(lines[1]) && validateRegExp(lines[2]) && validateRegExp(lines[3])){
+                        if(validateAlfaNum(lines[1]) && validateAlfaNum(lines[2]) 
+                                && validateAlfaNum(lines[3])){
                             msgOneFound = messageFound(lines[1], lines[3]);
                             if(msgOneFound){
                                 response = `SI<br/>NO`;    
@@ -109,6 +141,11 @@ const getMessage: RequestHandler = async (req, res) => {
 
 }
 
+/**
+ * Endpoint function to list the files into DIR encmsgs
+ * @param req 
+ * @param res 
+ */
 const getMessages: RequestHandler = async (req, res) => {
 
     fs.promises.readdir('./encmsgs')

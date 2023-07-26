@@ -1,0 +1,6 @@
+@apihost = http://localhost:4000 
+
+GET {{apihost}}/messages
+###
+GET {{apihost}}/messages/message1
+
